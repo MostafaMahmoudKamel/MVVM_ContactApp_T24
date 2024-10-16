@@ -23,6 +23,6 @@ class ContactRepositoryImpl : ContactRepository {
     }
 
     override fun searchContact(search: String): List<Contact> {
-        return contactList.filter { it.name.startsWith(search) }
+        return contactList.filter { it.name.startsWith(search, ignoreCase = true) }
     }
 }

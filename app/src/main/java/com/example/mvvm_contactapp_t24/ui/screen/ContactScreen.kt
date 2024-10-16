@@ -1,30 +1,20 @@
 package com.example.mvvm_contactapp_t24.ui.screen
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -33,24 +23,20 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mvvm_contactapp_t24.R
 import com.example.mvvm_contactapp_t24.model.Contact
+import com.example.mvvm_contactapp_t24.ui.layout.ContactCard
+import com.example.mvvm_contactapp_t24.ui.layout.UIState
 import com.example.mvvm_contactapp_t24.utils.isEmailValid
 import com.example.mvvm_contactapp_t24.utils.isNameValid
 import com.example.mvvm_contactapp_t24.utils.isPhoneValid
@@ -82,6 +68,7 @@ fun ContactScreen() {
     //list
     val contactList by contactViewModel.contactList.collectAsState()
 
+//    val uiState by contactViewModel.uiState.collectAsState()
 
 
     Scaffold(
@@ -89,7 +76,9 @@ fun ContactScreen() {
             TopAppBar(
                 title = { Text("Contact List", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Magenta)
+
             )
+
         },
         snackbarHost = {},
         floatingActionButton = {
@@ -101,65 +90,33 @@ fun ContactScreen() {
 
     ) { padding ->
 
+
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .padding(top = 16.dp)
         ) {
             itemsIndexed(contactList, key = { index, _ -> index }) { index, contact ->
-                Card(
-                    modifier = Modifier
-                        .padding(top = 16.dp, start = 8.dp, end = 8.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp)),
+                ContactCard(contact, testDesha = { contactRes ->
+                    Log.i("Tag", "Contact res test desha is ${contactRes.email}")
+                },
+                    onClick = {
+                        contactViewModel.setUpdateBottomVisible(isShow = true)
+                        contactViewModel.setIndex(index = index)
 
-                    ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                contactViewModel.setUpdateBottomVisible(isShow = true)
-                                contactViewModel.setIndex(index = index)
-
-                                // Initialize text fields with the selected contact's data only when the card is clicked
-                                contactViewModel.setName(contactList[contactViewModel.index.value].name)
-                                contactViewModel.setPhone(contactList[contactViewModel.index.value].phone)
-                                contactViewModel.setAddress(contactList[contactViewModel.index.value].address)
-                                contactViewModel.setEmail(contactList[contactViewModel.index.value].email)
-                            },
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.desha2),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .border(width = 1.dp, color = Color.Black, shape = CircleShape)
-                                .clip(
-                                    CircleShape
-                                ),
-                            contentScale = ContentScale.Crop
-                        )
-                        Column {
-
-                            Text(
-                                text = contact.name,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Blue
-                            )
-                            Text(text = "Phone: ${contact.phone}")
-                            Text(text = "Address: ${contact.address}")
-                            Text(text = "Email: ${contact.email}")
-                            Text(text = "time: ${contact.time}")
-                            Text(text = "Date: ${contact.date}")
-                        }
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = null)
-
+                        // Initialize text fields with the selected contact's data only when the card is clicked
+                        contactViewModel.setName(contactList[contactViewModel.index.value].name)
+                        contactViewModel.setPhone(contactList[contactViewModel.index.value].phone)
+                        contactViewModel.setAddress(contactList[contactViewModel.index.value].address)
+                        contactViewModel.setEmail(contactList[contactViewModel.index.value].email)
                     }
-                }
+                )
             }
         }
+//    }
+
+//    }
+
 
         if (isAddBottomVisible) {
             ModalBottomSheet(
@@ -176,9 +133,11 @@ fun ContactScreen() {
                         OutlinedTextField(
                             value = name,
                             onValueChange = {
-                                contactViewModel.setName(it)
-                                if(name.isNameValid())contactViewModel.setNameError(false) else contactViewModel.setNameError(true)
-                                            },
+                                contactViewModel.setName(it) //it
+                                if (name.isNameValid()) contactViewModel.setNameError(false) else contactViewModel.setNameError(
+                                    true
+                                )
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(4.dp)
@@ -190,7 +149,9 @@ fun ContactScreen() {
                             value = phone,
                             onValueChange = {
                                 contactViewModel.setPhone(it)
-                                if(phone.isPhoneValid())contactViewModel.setPhoneError(false) else contactViewModel.setPhoneError(true)
+                                if (phone.isPhoneValid()) contactViewModel.setPhoneError(false) else contactViewModel.setPhoneError(
+                                    true
+                                )
 
                             },
                             modifier = Modifier
@@ -217,8 +178,11 @@ fun ContactScreen() {
                         )
                         OutlinedTextField(
                             value = email,
-                            onValueChange = { contactViewModel.setEmail(it)
-                                if(email.isEmailValid())contactViewModel.setEmailError(false) else contactViewModel.setEmailError(true)
+                            onValueChange = {
+                                contactViewModel.setEmail(it)
+                                if (email.isEmailValid()) contactViewModel.setEmailError(false) else contactViewModel.setEmailError(
+                                    true
+                                )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -320,10 +284,18 @@ fun ContactScreen() {
                                     newContact = Contact(name, phone, address, email, "", "")
                                 )
                                 contactViewModel.setUpdateBottomVisible(isShow = false)
+
                             }) {
                                 Text("Confirm")
                             }
-                            Button(onClick = { contactViewModel.setUpdateBottomVisible(isShow = false) }) {
+                            Button(onClick = {
+                                contactViewModel.setUpdateBottomVisible(isShow = false)
+                                //empty inputData in viewModel
+                                contactViewModel.setName("")
+                                contactViewModel.setEmail("")
+                                contactViewModel.setPhone("")
+                                contactViewModel.setAddress("")
+                            }) {
                                 Text(
                                     "Cancel"
                                 )

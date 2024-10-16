@@ -3,6 +3,7 @@ package com.example.mvvm_contactapp_t24.viewModel
 import androidx.lifecycle.ViewModel
 import com.example.mvvm_contactapp_t24.model.Contact
 import com.example.mvvm_contactapp_t24.repository.ContactRepositoryImpl
+import com.example.mvvm_contactapp_t24.ui.layout.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -61,6 +62,10 @@ class ContactViewModel : ViewModel() {
     private var _isUpdateModalBottomVisible = MutableStateFlow(false)
     var isUpdateModalBottomVisible: StateFlow<Boolean> = _isUpdateModalBottomVisible
 
+    //uiState
+    private var _uiState=MutableStateFlow<UIState>(UIState.Loading)
+    var uiState:StateFlow<UIState> =_uiState
+
 
     //setter
     fun setName(name: String) {
@@ -112,8 +117,15 @@ class ContactViewModel : ViewModel() {
     }
 
     fun addContact(contact: Contact) {
-        contactRepository.addContact(contact)
-        _contactList.value = contactRepository.getAllContact()//updateListState
+//        _uiState.value=UIState.Loading
+//        try {
+            contactRepository.addContact(contact)
+            _contactList.value = contactRepository.getAllContact()//updateListState
+//            _uiState.value=UIState.Success(_contactList.value,"SuccessAdd")
+//        }catch (e:Exception){
+//            _uiState.value = UIState.Error("Error adding user: ${e.message}")
+//
+//        }
     }
 
     fun updateContact(index: Int, newContact: Contact) {
