@@ -28,7 +28,7 @@ import com.example.mvvm_contactapp_t24.R
 import com.example.mvvm_contactapp_t24.model.Contact
 
 @Composable
-fun ContactCard(contact: Contact, onClick :()->Unit,testDesha:(Contact)->Unit){
+fun ContactCard(contact: Contact, onClick :()->Unit){
     Card(
         modifier = Modifier
             .padding(top = 16.dp, start = 8.dp, end = 8.dp)
@@ -41,7 +41,6 @@ fun ContactCard(contact: Contact, onClick :()->Unit,testDesha:(Contact)->Unit){
                 .padding(16.dp)
                 .fillMaxWidth()
                 .clickable {
-                    testDesha(contact)
                    onClick()
                 },
             horizontalArrangement = Arrangement.SpaceAround

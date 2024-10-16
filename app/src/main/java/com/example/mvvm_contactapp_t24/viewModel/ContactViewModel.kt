@@ -1,11 +1,13 @@
 package com.example.mvvm_contactapp_t24.viewModel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mvvm_contactapp_t24.model.Contact
 import com.example.mvvm_contactapp_t24.repository.ContactRepositoryImpl
 import com.example.mvvm_contactapp_t24.ui.layout.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class ContactViewModel : ViewModel() {
 
@@ -63,79 +65,66 @@ class ContactViewModel : ViewModel() {
     var isUpdateModalBottomVisible: StateFlow<Boolean> = _isUpdateModalBottomVisible
 
     //uiState
-    private var _uiState=MutableStateFlow<UIState>(UIState.Loading)
-    var uiState:StateFlow<UIState> =_uiState
+    private var _uiState = MutableStateFlow<UIState>(UIState.Loading)
+    var uiState: StateFlow<UIState> = _uiState
 
 
     //setter
-    fun setName(name: String) {
-        _name.value = name
-    }
-
-    fun setPhone(phone: String) {
-        _phone.value = phone
-    }
-
-    fun setAddress(address: String) {
-        _address.value = address
-    }
-
-    fun setEmail(email: String) {
-        _email.value = email
-    }
-
-    fun setNameError(hasError: Boolean) {
-        _nameError.value = hasError
-    }
-
-    fun setPhoneError(hasError: Boolean) {
-        _phoneError.value = hasError
-    }
-
-    fun setAddressError(hasError: Boolean) {
-        _addressError.value = hasError
-    }
-
-    fun setEmailError(hasError: Boolean) {
-        _emailError.value = hasError
-    }
-
-    fun setSearch(search: String) {
-        _search.value = search
-    }
-
-    fun setAddBottomVisible(isShow: Boolean) {
-        _isAddModalBottomVisible.value = isShow
-    }
-
-    fun setUpdateBottomVisible(isShow: Boolean) {
-        _isUpdateModalBottomVisible.value = isShow
-    }
-
-    fun setIndex(index: Int) {
-        _index.value = index
-    }
+    fun setName(name: String) { _name.value = name }
+    fun setPhone(phone: String) { _phone.value = phone }
+    fun setAddress(address: String) { _address.value = address }
+    fun setEmail(email: String) { _email.value = email }
+    fun setNameError(hasError: Boolean) { _nameError.value = hasError }
+    fun setPhoneError(hasError: Boolean) { _phoneError.value = hasError }
+    fun setAddressError(hasError: Boolean) { _addressError.value = hasError }
+    fun setEmailError(hasError: Boolean) { _emailError.value = hasError }
+    fun setSearch(search: String) { _search.value = search }
+    fun setAddBottomVisible(isShow: Boolean) { _isAddModalBottomVisible.value = isShow }
+    fun setUpdateBottomVisible(isShow: Boolean) { _isUpdateModalBottomVisible.value = isShow }
+    fun setIndex(index: Int) { _index.value = index }
 
     fun addContact(contact: Contact) {
-//        _uiState.value=UIState.Loading
-//        try {
-            contactRepository.addContact(contact)
-            _contactList.value = contactRepository.getAllContact()//updateListState
-//            _uiState.value=UIState.Success(_contactList.value,"SuccessAdd")
-//        }catch (e:Exception){
-//            _uiState.value = UIState.Error("Error adding user: ${e.message}")
-//
-//        }
+        _uiState.value = UIState.Loading
+        try {
+            viewModelScope.launch {
+                contactRepository.addContact(contact)
+                _contactList.value = contactRepository.getAllContact()//updateListState
+                _uiState.value = UIState.Success(_contactList.value, "SuccessAdd")
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error("Error adding contact: ${e.message}")
+        }
     }
 
     fun updateContact(index: Int, newContact: Contact) {
-        contactRepository.updateContact(index, newContact)
-        _contactList.value = contactRepository.getAllContact()
+        _uiState.value = UIState.Loading
+
+        try {
+            viewModelScope.launch {
+                contactRepository.updateContact(index, newContact)
+                _contactList.value = contactRepository.getAllContact()
+                _uiState.value = UIState.Success(_contactList.value, "SuccessAdd")
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error("Error update contact: ${e.message}")
+        }
+
     }
 
     fun deleteContact(index: Int) {
-        contactRepository.deleteContact(index)
-        _contactList.value = contactRepository.getAllContact()
+        _uiState.value = UIState.Loading
+
+        try {
+            viewModelScope.launch {
+
+                contactRepository.deleteContact(index)
+                _contactList.value = contactRepository.getAllContact()
+                _uiState.value = UIState.Success(_contactList.value, "SuccessAdd")
+
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error("Error deleting  contact: ${e.message}")
+        }
     }
 
 
